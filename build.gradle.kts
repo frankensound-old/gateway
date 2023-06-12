@@ -8,6 +8,7 @@ plugins {
     kotlin("jvm") version "1.8.20"
     id("io.ktor.plugin") version "2.2.4"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
+    id("org.sonarqube") version "4.2.0.3129"
 }
 
 group = "com.frankensound"
@@ -43,4 +44,12 @@ dependencies {
     implementation("io.github.oshai:kotlin-logging-jvm:4.0.0-beta-27")
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "frankensound_gateway")
+        property("sonar.organization", "frankensound")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
