@@ -1,0 +1,36 @@
+openapi: "3.0.3"
+info:
+  title: "gateway API"
+  description: "gateway API"
+  version: "1.0.0"
+servers:
+- url: "https://gateway"
+paths:
+  /:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Hello World!"
+  /json/kotlinx-serialization:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map"
+components:
+  schemas:
+    Map:
+      type: "object"
+      properties: {}

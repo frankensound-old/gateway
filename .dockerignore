@@ -1,0 +1,10 @@
+# Ignore .git and .cache folders
+.git
+.cache
+# Ignore all markdown files
+*.md
+# Ignore sensitive files
+*.env
+#Ignore generated folders
+node_modules
+.idea
