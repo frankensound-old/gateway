@@ -102,15 +102,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '19'
-          distribution: 'corretto'
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-      - name: Build with Gradle
-        run: ./gradlew build
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/gradle@master
         continue-on-error: true
@@ -118,7 +109,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --sarif-file-output=snyk.sarif
-                --severity-threshold=high
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
