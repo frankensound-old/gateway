@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap
+data:
+  songs: songs-service
+  history: history-service
+  region: "eu-north-1"
+  bucket: "frankensound"
+  songs_queue: "songs-played"

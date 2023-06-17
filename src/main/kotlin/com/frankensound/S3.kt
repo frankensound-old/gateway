@@ -4,8 +4,9 @@ import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.ListObjectsRequest
 import aws.smithy.kotlin.runtime.content.toByteArray
+import java.net.URL
 
-val client = S3Client { region = "eu-north-1" }
+val client = S3Client { region = System.getenv("REGION") }
 
 suspend fun getObject(bucketName: String, keyName: String, rangeValue: String?): ResponseS3? {
     val request = GetObjectRequest {

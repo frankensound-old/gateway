@@ -2,7 +2,6 @@ package com.frankensound.plugins
 
 import com.frankensound.ResponseS3
 import com.frankensound.getObject
-import com.frankensound.listBucketObs
 import io.github.oshai.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -17,7 +16,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-const val bucketName = "frankensound"
+val bucketName = System.getenv("BUCKET_NAME")
 
 fun Application.configureRouting() {
     val logger = KotlinLogging.logger {}
@@ -38,52 +37,55 @@ fun Application.configureRouting() {
 
         // Return a list of songs
         get("/songs") {
-            logger.info { "Returned songs" }
-            call.respondText(listBucketObs(bucketName).toString())
-        }
-
-        // Play a song, streaming chunks
-        get("/songs/play/{title}") {
-            val key: String = call.parameters["title"].toString()
-
-            val header = call.request.header(HttpHeaders.Range).toString()
-            if (!header.contains("=")) {
-                return@get call.respond(HttpStatusCode.BadRequest)
-            }
-            val unit = header.substringBefore("=").ifEmpty { null } ?: return@get call.respond(HttpStatusCode.BadRequest)
-            if (unit != "bytes") {
-                return@get call.respond(HttpStatusCode.BadRequest)
-            }
-            val range = header.substringAfter("=").split("-").ifEmpty { null } ?: return@get call.respond(HttpStatusCode.BadRequest)
-            val start = range.getOrNull(0)?.ifBlank { null }?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest)
-            val end = range.getOrNull(1)?.ifBlank { null }?.toIntOrNull() ?: (start + 500000)
-
-            if(end < start){
-                return@get call.respond(HttpStatusCode.BadRequest)
-            }
-            val rangeVal = "$unit=$start-$end"
-
-            val responseS3: ResponseS3 = getObject(bucketName, key, rangeVal) ?: return@get call.respond(HttpStatusCode.NotFound)
-
-            call.response.headers.append(HttpHeaders.AcceptRanges, "bytes")
-
-            call.response.headers.append(HttpHeaders.ContentRange, responseS3.contentRange!!)
-
-            return@get call.respondBytes(responseS3.data, status = HttpStatusCode.PartialContent)
-        }
-
-        //Return play history of user
-        get("/profile/history") {
-            val response: HttpResponse = client.get("http://host.docker.internal:8090")
+            val response: HttpResponse = client.get(System.getenv("SONGS_MICROSERVICE_URL"))
 
             if (response.status.value in 200..299) {
                 call.response.status(HttpStatusCode.OK)
+                call.respondText(response.body())
+            } else {
+                call.response.status(HttpStatusCode.InternalServerError)
             }
-            call.respondText(response.body())
         }
-        //Return recommendation made for user
-        get("profile/recommendations") {
-            //TODO: Implement recommendations endpoint
+
+        // Play a song, streaming chunks
+        get("/songs/play/{name}") {
+            val response: HttpResponse =
+                client.get(System.getenv("SONGS_MICROSERVICE_URL") + call.parameters["name"].toString())
+            if (response.status.value in 200..299) {
+                val key: String = response.body()
+                val header = call.request.header(HttpHeaders.Range).toString()
+                if (!header.contains("=")) {
+                    return@get call.respond(HttpStatusCode.BadRequest)
+                }
+                val unit =
+                    header.substringBefore("=").ifEmpty { null } ?: return@get call.respond(HttpStatusCode.BadRequest)
+                if (unit != "bytes") {
+                    return@get call.respond(HttpStatusCode.BadRequest)
+                }
+                val range = header.substringAfter("=").split("-").ifEmpty { null } ?: return@get call.respond(
+                    HttpStatusCode.BadRequest
+                )
+                val start = range.getOrNull(0)?.ifBlank { null }?.toIntOrNull() ?: return@get call.respond(
+                    HttpStatusCode.BadRequest
+                )
+                val end = range.getOrNull(1)?.ifBlank { null }?.toIntOrNull() ?: (start + 500000)
+
+                if (end < start) {
+                    return@get call.respond(HttpStatusCode.BadRequest)
+                }
+                val rangeVal = "$unit=$start-$end"
+
+                val responseS3: ResponseS3 =
+                    getObject(bucketName, key, rangeVal) ?: return@get call.respond(HttpStatusCode.NotFound)
+
+                call.response.headers.append(HttpHeaders.AcceptRanges, "bytes")
+
+                call.response.headers.append(HttpHeaders.ContentRange, responseS3.contentRange!!)
+
+                return@get call.respondBytes(responseS3.data, status = HttpStatusCode.PartialContent)
+            } else {
+                call.response.status(HttpStatusCode.InternalServerError)
+            }
         }
     }
 }

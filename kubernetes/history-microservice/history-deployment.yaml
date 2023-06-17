@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: history
+  namespace: production
+  labels:
+    app: history
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: history
+  template:
+    metadata:
+      labels:
+        app: history
+    spec:
+      containers:
+        - name: history
+          image: marinastancu/history-microservice:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: RABBITMQ
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: URL
+            - name: PORT
+              value: 8090
+            - name: SONGS_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: songs_queue
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: history-postgres
+                  key: USERNAME
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: history-postgres
+                  key: HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: history-postgres
+                  key: NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: history-postgres
+                  key: PASSWORD
+            - name: DB_PORT
+              value: 5432
+            - name: DB_ENGINE
+              value: "postgres"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: history
+  namespace: production
+spec:
+  selector:
+    app: history
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+      nodePort: 30001

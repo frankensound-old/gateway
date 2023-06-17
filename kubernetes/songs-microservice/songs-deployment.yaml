@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: songs
+  namespace: production
+  labels:
+    app: songs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: songs
+  template:
+    metadata:
+      labels:
+        app: songs
+    spec:
+      containers:
+        - name: songs
+          image: marinastancu/songs-microservice:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: RABBITMQ
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: URL
+            - name: PORT
+              value: 8080
+            - name: QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: songs_queue
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: songs-postgres
+                  key: USERNAME
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: songs-postgres
+                  key: HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: songs-postgres
+                  key: NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: songs-postgres
+                  key: PASSWORD
+            - name: DB_PORT
+              value: 5432
+            - name: DB_ENGINE
+              value: "postgres"
+            - name: BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: bucket
+            - name: REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: region
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: songs
+  namespace: production
+spec:
+  selector:
+    app: songs
+  ports:
+    - protocol: TCP
+      port: 3002
+      targetPort: 3002
