@@ -80,13 +80,13 @@ jobs:
       - name: Get Kubernetes context
         uses: azure/aks-set-context@v3
         with:
-          resource-group: artify
-          cluster-name: marina
+          resource-group: frankensound
+          cluster-name: frankensound
 
       - name: Deploy application
         uses: azure/k8s-deploy@v4
         with:
-          manifests: ./kubernetes/gateway/gateway
+          manifests: ./kubernetes/gateway/
           action: deploy
           strategy: basic
           pull-images: false
