@@ -64,7 +64,7 @@ jobs:
       - name: Build and push image
         env:
           IMAGE_TAG: ${{ github.sha }}
-        run: ./gradlew jib -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
+        run: ./gradlew jib -Djib.to.auth.username="${{ secrets.DOCKER_USERNAME }}" -Djib.to.auth.password="${{ secrets.DOCKER_PASSWORD }}"
 
   deploy:
     needs: [ test, publish ]
