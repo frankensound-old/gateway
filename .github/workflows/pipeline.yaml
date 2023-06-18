@@ -80,8 +80,8 @@ jobs:
       - name: Get Kubernetes context
         uses: azure/aks-set-context@v3
         with:
-          resource-group: semester6deployments
-          cluster-name: frankensound
+          resource-group: artify
+          cluster-name: marina
 
       - name: Deploy application
         uses: azure/k8s-deploy@v4
