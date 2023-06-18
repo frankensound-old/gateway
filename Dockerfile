@@ -6,8 +6,6 @@ RUN gradle buildFatJar --no-daemon
 
 # Use image
 FROM openjdk:11
-# Expose application port
-EXPOSE 8080:8080
 # Create directory
 RUN mkdir /app
 # Copy files

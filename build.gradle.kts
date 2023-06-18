@@ -9,6 +9,7 @@ plugins {
     id("io.ktor.plugin") version "2.2.4"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
     id("org.sonarqube") version "4.2.0.3129"
+    id ("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 group = "com.frankensound"
@@ -52,4 +53,12 @@ sonarqube {
         property("sonar.organization", "frankensound")
         property("sonar.host.url", "https://sonarcloud.io")
     }
+}
+
+jib {
+    to {
+        tags = setOf(project.version.toString())
+        image = "marinastancu/gateway"
+    }
+    from.image = "amazoncorretto:19-alpine"
 }

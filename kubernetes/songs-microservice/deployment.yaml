@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: songs
-  namespace: production
   labels:
     app: songs
 spec:
@@ -27,7 +26,7 @@ spec:
                   name: rabbitmq
                   key: URL
             - name: PORT
-              value: 8080
+              value: "8080"
             - name: QUEUE
               valueFrom:
                 configMapKeyRef:
@@ -54,7 +53,7 @@ spec:
                   name: songs-postgres
                   key: PASSWORD
             - name: DB_PORT
-              value: 5432
+              value: "5432"
             - name: DB_ENGINE
               value: "postgres"
             - name: BUCKET_NAME
@@ -72,11 +71,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: songs
-  namespace: production
 spec:
   selector:
     app: songs
   ports:
     - protocol: TCP
       port: 3002
-      targetPort: 3002
